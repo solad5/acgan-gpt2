@@ -6,8 +6,10 @@ from torch.nn.utils.rnn import pad_sequence
 import torch.nn as nn
 import torch
 from bpe_encoder import get_codec
-from gpt2_model import GPT2
+from gpt2_model import GPT2, load_weight
 from utils import parse_config
+import os
+import requests
 
 def bert_encoder():
     return BERTEncoder()
@@ -74,6 +76,16 @@ class GPT2Encoder(Embedder):
         self.codec = get_codec()
         self.gpt2_config = parse_config()
         self.gpt2_model = GPT2(self.gpt2_config)
+
+        # load GPT-2 model from checkpoint
+        if not os.path.exists('gpt2-pytorch_model.bin'):
+            print("Downloading GPT-2 checkpoint...")
+            url = 'https://s3.amazonaws.com/models.huggingface.co/bert/gpt2-pytorch_model.bin'
+            r = requests.get(url, allow_redirects=True)
+            open('gpt2-pytorch_model.bin', 'wb').write(r.content)
+
+        self.gpt2_model = load_weight(self.gpt2_model, torch.load('gpt2-pytorch_model.bin')) #, map_location=device))
+        #self.gpt2_model = self.gpt2_model.to(device)
 
     def forward(self, class_labels, captions):
         '''

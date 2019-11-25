@@ -50,6 +50,13 @@ parser.add_argument("--conditioning", type=str, default="bert", choices=["bert",
 opt = parser.parse_args()
 print(opt)
 
+
+# write log output to file
+import sys
+outputFile = r'.\log\outlog_cifar10_gpt2.txt'
+sys.stdout = open(outputFile, mode='w', buffering=1)
+#skip 'buffering' if you don't want the output to be flushed right away after written
+
 # specify the gpu id if using only 1 gpu
 if opt.ngpu == 1:
     os.environ['CUDA_VISIBLE_DEVICES'] = str(opt.gpu_id)
